@@ -20,7 +20,15 @@ Version=2
 
 
 def default_fl_hardware_path() -> Path:
-    return Path.home() / "Documents" / "Image-Line" / "FL Studio" / "Settings" / "Hardware"
+    # Use the shell's registered Documents path so OneDrive-redirected folders work.
+    try:
+        import ctypes, ctypes.wintypes
+        buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+        ctypes.windll.shell32.SHGetFolderPathW(None, 5, None, 0, buf)  # CSIDL_PERSONAL = 5
+        documents = Path(buf.value)
+    except Exception:
+        documents = Path.home() / "Documents"
+    return documents / "Image-Line" / "FL Studio" / "Settings" / "Hardware"
 
 
 def install(destination: Path | None = None) -> Path:
